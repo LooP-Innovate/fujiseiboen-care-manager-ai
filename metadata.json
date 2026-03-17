@@ -1,0 +1,5 @@
+{
+  "name": "Fujiseiboen Care Manager AI Assistant",
+  "description": "An AI assistant for care managers at Fujiseiboen, specializing in services for special nursing homes for the elderly. It streamlines tasks from assessment and care plan creation to monitoring and documentation.",
+  "requestFramePermissions": []
+}
