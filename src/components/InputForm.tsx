@@ -23,13 +23,21 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title
 const Field: React.FC<{
   label: string;
   required?: boolean;
+  helperText?: string;
   children: React.ReactNode;
-}> = ({ label, required, children }) => (
-  <div className="mb-3">
-    <label className="block text-sm font-medium text-slate-700 mb-1">
-      {label}
-      {required && <span className="text-red-500 ml-1">*</span>}
-    </label>
+}> = ({ label, required, helperText, children }) => (
+  <div className="mb-4">
+    <div className="flex items-center mb-1">
+      <label className="block text-sm font-bold text-slate-700">
+        {label}
+      </label>
+      {required ? (
+        <span className="ml-2 text-[10px] font-bold text-white bg-red-500 rounded px-1.5 py-0.5">必須</span>
+      ) : (
+        <span className="ml-2 text-[10px] font-bold text-slate-500 bg-slate-200 rounded px-1.5 py-0.5">任意</span>
+      )}
+    </div>
+    {helperText && <p className="text-xs text-slate-500 mb-1.5">{helperText}</p>}
     {children}
   </div>
 );
@@ -59,7 +67,7 @@ const InputForm: React.FC<InputFormProps> = ({
       {/* グループ1：プランの前提 */}
       <Section title="1. プランの前提">
         <div className="mb-3">
-          <Field label="要介護度" required>
+          <Field label="要介護度" required helperText="現在の認定状況">
             <select
               value={resident.careLevel}
               onChange={(e) => onUpdateResident('careLevel', e.target.value)}
@@ -71,12 +79,12 @@ const InputForm: React.FC<InputFormProps> = ({
             </select>
           </Field>
         </div>
-        <Field label="本人・家族の希望" required>
+        <Field label="本人・家族の希望（意向）" required helperText="今後の生活に対する本人と家族の目標や意向">
           <textarea
-            rows={2}
+            rows={3}
             value={needs.wishes}
             onChange={(e) => onUpdateNeeds('wishes', e.target.value)}
-            placeholder="例：「できるだけ家で過ごしたい」。家族は転倒・誤嚥が心配"
+            placeholder="例：【本人】できるだけ住み慣れた家で過ごしたい。&#10;【家族】転倒や誤嚥が心配なので、安全に見守れる体制を作りたい。"
             className={textareaClass}
           />
         </Field>
@@ -84,30 +92,30 @@ const InputForm: React.FC<InputFormProps> = ({
 
       {/* グループ2：対象者の現状 */}
       <Section title="2. 対象者の現状">
-        <Field label="主疾患・医療的ケア" required>
-          <input
-            type="text"
+        <Field label="主疾患・医療的ケア・服薬状況" required helperText="病名、治療中の疾患、服薬上の注意点など">
+          <textarea
+            rows={2}
             value={resident.mainDiagnosis}
             onChange={(e) => onUpdateResident('mainDiagnosis', e.target.value)}
-            placeholder="例：アルツハイマー型認知症。降圧剤を腹薬中"
-            className={inputClass}
+            placeholder="例：アルツハイマー型認知症。高血圧のため降圧剤を朝食後に服薬。インスリン自己注射あり。"
+            className={textareaClass}
           />
         </Field>
-        <Field label="ADL・身体状況" required>
+        <Field label="ADL・身体状況（課題となる点）" required helperText="移動、食事、排泄、入浴などの日常生活動作における課題">
           <textarea
             rows={3}
             value={needs.physicalStatus}
             onChange={(e) => onUpdateNeeds('physicalStatus', e.target.value)}
-            placeholder="例：移動は杖歩行で不安定。入浴は見守り。排泄はリハパン使用で時々失敗あり。"
+            placeholder="例：移動は杖歩行だが不安定で転倒リスクあり。排泄はリハパンツ使用、時々失敗あり。入浴は見守りが必要。"
             className={textareaClass}
           />
         </Field>
-        <Field label="認知機能・精神状況" required>
+        <Field label="認知機能・精神状況" required helperText="見当識障害、記憶障害、周辺症状（BPSD）の有無など">
           <textarea
             rows={2}
             value={needs.cognition}
             onChange={(e) => onUpdateNeeds('cognition', e.target.value)}
-            placeholder="例：直前のことを忘れる。夕方不穏になることがある。"
+            placeholder="例：短期記憶の低下あり、直前の出来事を忘れる。夕方になると不穏になることがある。"
             className={textareaClass}
           />
         </Field>
@@ -115,35 +123,35 @@ const InputForm: React.FC<InputFormProps> = ({
 
       {/* グループ3：取り巻く環境とリスク */}
       <Section title="3. 取り巻く環境とリスク">
-        <Field label="家族・支援体制" required>
+        <Field label="家族構成・支援体制" required helperText="キーパーソンの状況、日中・夜間のサポート体制（インフォーマル支援）">
           <textarea
             rows={2}
             value={needs.familySupport}
             onChange={(e) => onUpdateNeeds('familySupport', e.target.value)}
-            placeholder="例：長女と同居だが日中は仕事で不在。近隣に親族なし。"
+            placeholder="例：長女と同居だが日中はフルタイム勤務のため不在。キーパーソンは長女。近隣に親族なし。"
             className={textareaClass}
           />
         </Field>
-        <Field label="リスク・留意点" required>
+        <Field label="リスク・留意点（環境要因含む）" required helperText="段差・住環境・独居・動線などの環境要因、その他の安全リスク">
           <textarea
-            rows={2}
+            rows={3}
             value={needs.otherRisks}
             onChange={(e) => onUpdateNeeds('otherRisks', e.target.value)}
-            placeholder="例：過去半年で2回戦倒。段差でのつまづきリスク高。"
+            placeholder="例：【環境】築40年の戸建てで段差が多い。寝室が2階のため階段昇降のリスク高。&#10;【リスク】過去半年で2回転倒。独居時の火の不始末の恐れ。"
             className={textareaClass}
           />
         </Field>
       </Section>
 
-      {/* グループ4：基本属性（任意） */}
-      <Section title="4. 基本属性（任意）">
+      {/* グループ4：基本属性 */}
+      <Section title="4. 基本属性">
         <div className="grid grid-cols-2 gap-3 mb-3">
-          <Field label="氏名">
+          <Field label="氏名" helperText="イニシャル・識別名でも可">
             <input
               type="text"
               value={resident.name}
               onChange={(e) => onUpdateResident('name', e.target.value)}
-              placeholder="例：山田 花子"
+              placeholder="例：山田 花子 または Y.H氏"
               className={inputClass}
             />
           </Field>
@@ -152,7 +160,7 @@ const InputForm: React.FC<InputFormProps> = ({
               type="text"
               value={resident.age}
               onChange={(e) => onUpdateResident('age', e.target.value)}
-              placeholder="例：82"
+              placeholder="例：85"
               className={inputClass}
             />
           </Field>
