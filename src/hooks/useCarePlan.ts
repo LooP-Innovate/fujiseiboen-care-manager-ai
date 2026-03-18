@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { FormData, ResidentInfo, NeedsInfo, GeneratedPlan, AiModel } from '../types';
 import { AIService } from '../services/aiService';
+import { loadRelevantKnowledge } from '../prompts/knowledgeLoader';
 
 const initialFormData: FormData = {
   resident: {
@@ -57,8 +58,12 @@ export const useCarePlan = () => {
     setGeneratedPlan({ content: '', isStreaming: false, error: null });
 
     try {
+      const knowledgeContext = loadRelevantKnowledge(formData);
+
       const prompt = `
 以下の利用者情報に基づき、適切なケアプラン草案（解決すべき課題、長期目標、短期目標、サービス内容）を作成してください。
+
+${knowledgeContext ? knowledgeContext + '\n' : ''}
 
 【基本属性】
 氏名: ${formData.resident.name || '未記入'}
