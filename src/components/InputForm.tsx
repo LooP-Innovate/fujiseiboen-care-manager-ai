@@ -7,6 +7,7 @@ interface InputFormProps {
   onUpdateNeeds: (field: keyof NeedsInfo, value: string) => void;
   onUpdateReference: (value: string) => void;
   onGenerate: () => void;
+  onClear: () => void;
   isLoading: boolean;
 }
 
@@ -58,6 +59,7 @@ const InputForm: React.FC<InputFormProps> = ({
   onUpdateNeeds,
   onUpdateReference,
   onGenerate,
+  onClear,
   isLoading,
 }) => {
   const { resident, needs } = formData;
@@ -238,14 +240,24 @@ const InputForm: React.FC<InputFormProps> = ({
         </div>
       </Section>
 
-      {/* ─── 生成ボタン ─── */}
-      <button
-        onClick={onGenerate}
-        disabled={isLoading || !resident.careLevel}
-        className="w-full py-3 rounded-lg font-bold text-white bg-teal-600 hover:bg-teal-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors shadow-sm"
-      >
-        {isLoading ? '生成中...' : '✨ ケアプラン草案を生成'}
-      </button>
+      {/* ─── アクションボタン ─── */}
+      <div className="flex gap-3">
+        <button
+          onClick={onClear}
+          disabled={isLoading}
+          className="w-1/3 py-3 rounded-lg font-bold text-slate-600 bg-slate-200 hover:bg-slate-300 disabled:bg-slate-100 disabled:text-slate-400 transition-colors shadow-sm"
+        >
+          クリア
+        </button>
+        <button
+          onClick={onGenerate}
+          disabled={isLoading || !resident.careLevel}
+          className="w-2/3 py-3 rounded-lg font-bold text-white bg-teal-600 hover:bg-teal-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center justify-center gap-2"
+        >
+          <span>✨</span>
+          <span>{isLoading ? '生成中...' : '草案を生成'}</span>
+        </button>
+      </div>
       {!resident.careLevel && (
         <p className="text-xs text-slate-500 text-center mt-2">※ 要介護度を選択してください</p>
       )}

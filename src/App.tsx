@@ -34,6 +34,7 @@ const App: React.FC = () => {
             onUpdateNeeds={updateNeeds}
             onUpdateReference={updateReference}
             onGenerate={handleGenerate}
+            onClear={handleClear}
             isLoading={generatedPlan.isStreaming}
           />
         </div>
