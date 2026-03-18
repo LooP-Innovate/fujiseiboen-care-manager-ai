@@ -31,6 +31,7 @@ export interface NeedsInfo {
 export interface FormData {
   resident: ResidentInfo;
   needs: NeedsInfo;
+  referenceText: string;
 }
 
 // AI生成結果

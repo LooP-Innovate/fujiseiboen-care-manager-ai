@@ -18,6 +18,7 @@ const initialFormData: FormData = {
     familySupport: '',
     otherRisks: '',
   },
+  referenceText: '',
 };
 
 export const useCarePlan = () => {
@@ -41,6 +42,13 @@ export const useCarePlan = () => {
     setFormData(prev => ({
       ...prev,
       needs: { ...prev.needs, [field]: value }
+    }));
+  }, []);
+
+  const updateReference = useCallback((value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      referenceText: value,
     }));
   }, []);
 
@@ -83,11 +91,13 @@ ADL・身体状況: ${formData.needs.physicalStatus || '未記入'}
 【認知面】
 認知・精神状況: ${formData.needs.cognition || '未記入'}
 
-【環境面】
+【家庭面】
 家族・支援体制: ${formData.needs.familySupport || '未記入'}
 
 【安全面】
 リスク・留意点: ${formData.needs.otherRisks || '未記入'}
+
+${formData.referenceText ? `\n### 【補助情報：参考資料・引継ぎメモ】\n以下のテキストは対象者の状態を補足する参考資料（退院時サマリー等）です。上記フォーム入力内容（主入力）を優先しつつ、不足している背景事情や主入力との矛盾点があれば抽出し、出力内の「7. 注意点」または「8. 生成上の前提・不足情報」に明記してください。\n<ReferenceMaterial>\n${formData.referenceText}\n</ReferenceMaterial>\n` : ''}
       `.trim();
 
       const response = await AIService.runChat(
@@ -120,6 +130,7 @@ ADL・身体状況: ${formData.needs.physicalStatus || '未記入'}
     isLoading,
     updateResident,
     updateNeeds,
+    updateReference,
     setSelectedModel,
     handleGenerate,
     handleClear,

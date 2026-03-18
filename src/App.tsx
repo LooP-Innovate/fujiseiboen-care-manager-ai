@@ -1,73 +1,52 @@
-import React, { useState } from 'react';
-import Sidebar from './components/Sidebar';
-import MainContent from './components/MainContent';
-import AuthScreen from './components/AuthScreen';
-import ErrorBoundary from './components/ErrorBoundary';
-import { useChatManager } from './hooks/useChatManager';
-
-/**
- * This component encapsulates the main application logic and is only rendered when authenticated.
- * This ensures that `useChatManager` and its deep dependencies (like the GenAI SDK)
- * are only initialized when necessary, preventing potential load-time errors.
- */
-const AuthenticatedApp: React.FC = () => {
-  const {
-    sessions,
-    activeSession,
-    activeSessionId,
-    isInitialized,
-    isLoading,
-    setActiveSessionId,
-    handleNewChat,
-    handleSendMessage,
-    setAiModelId,
-    handleDeleteSession,
-    handleRenameSession,
-    selectedFile,
-    handleFileSelect,
-    handleFileRemove,
-  } = useChatManager();
-
-  // Prevents flicker or rendering with incomplete state while localStorage is being read.
-  if (!isInitialized) {
-    return null;
-  }
-
-  return (
-    <div className="flex h-full">
-      <Sidebar
-        sessions={sessions}
-        activeSessionId={activeSessionId}
-        onNewChat={handleNewChat}
-        onSelectSession={setActiveSessionId}
-        onDeleteSession={handleDeleteSession}
-        onRenameSession={handleRenameSession}
-      />
-      <MainContent
-        activeSession={activeSession}
-        isLoading={isLoading}
-        handleNewChat={handleNewChat}
-        handleSendMessage={handleSendMessage}
-        onModelSelect={setAiModelId}
-        selectedFile={selectedFile}
-        onFileSelect={handleFileSelect}
-        onFileRemove={handleFileRemove}
-      />
-    </div>
-  );
-};
-
+import React from 'react';
+import Header from './components/Header';
+import InputForm from './components/InputForm';
+import ResultPanel from './components/ResultPanel';
+import { useCarePlan } from './hooks/useCarePlan';
 
 const App: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const {
+    formData,
+    generatedPlan,
+    selectedModel,
+    isLoading,
+    updateResident,
+    updateNeeds,
+    updateReference,
+    setSelectedModel,
+    handleGenerate,
+    handleClear,
+  } = useCarePlan();
 
-  // Render the AuthScreen if the user is not authenticated.
-  if (!isAuthenticated) {
-    return <AuthScreen onAuthenticated={setIsAuthenticated} />;
-  }
-
-  // Once authenticated, render the main application.
-  return <AuthenticatedApp />;
+  return (
+    <div className="flex flex-col h-screen bg-slate-100">
+      <Header
+        selectedModel={selectedModel}
+        onModelChange={setSelectedModel}
+        onClear={handleClear}
+      />
+      <main className="flex flex-1 overflow-hidden gap-0">
+        {/* 左ペイン: 入力フォーム */}
+        <div className="w-full md:w-1/2 overflow-y-auto border-r border-slate-200 bg-white">
+          <InputForm
+            formData={formData}
+            onUpdateResident={updateResident}
+            onUpdateNeeds={updateNeeds}
+            onUpdateReference={updateReference}
+            onGenerate={handleGenerate}
+            isLoading={generatedPlan.isStreaming}
+          />
+        </div>
+        {/* 右ペイン: 生成結果 */}
+        <div className="w-full md:w-1/2 overflow-y-auto bg-slate-50">
+          <ResultPanel
+            plan={generatedPlan}
+            isLoading={isLoading}
+          />
+        </div>
+      </main>
+    </div>
+  );
 };
 
 export default App;

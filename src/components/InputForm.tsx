@@ -5,6 +5,7 @@ interface InputFormProps {
   formData: FormData;
   onUpdateResident: (field: keyof ResidentInfo, value: string) => void;
   onUpdateNeeds: (field: keyof NeedsInfo, value: string) => void;
+  onUpdateReference: (value: string) => void;
   onGenerate: () => void;
   isLoading: boolean;
 }
@@ -55,6 +56,7 @@ const InputForm: React.FC<InputFormProps> = ({
   formData,
   onUpdateResident,
   onUpdateNeeds,
+  onUpdateReference,
   onGenerate,
   isLoading,
 }) => {
@@ -177,6 +179,62 @@ const InputForm: React.FC<InputFormProps> = ({
               <option value="男性">男性</option>
             </select>
           </Field>
+        </div>
+      </Section>
+
+      {/* グループ5：補助情報・参考資料 */}
+      <Section title="5. 補助情報・参考資料">
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center">
+              <label className="block text-sm font-bold text-slate-700">参考資料・引継ぎメモ</label>
+              <span className="ml-2 text-[10px] font-bold text-slate-500 bg-slate-200 rounded px-1.5 py-0.5">任意</span>
+            </div>
+            <div>
+              <input 
+                type="file" 
+                accept=".txt,.md" 
+                id="file-upload"
+                className="hidden" 
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  if (file.size > 1024 * 100) { // Limit to 100KB for text
+                    alert('ファイルサイズが大きすぎます。100KB以下のテキストファイルを指定してください。');
+                    return;
+                  }
+                  const reader = new FileReader();
+                  reader.onload = (event) => {
+                    const text = event.target?.result as string;
+                    onUpdateReference(text);
+                  };
+                  reader.onerror = () => {
+                    alert('ファイルの読み込みに失敗しました。');
+                  }
+                  reader.readAsText(file);
+                  // clear input to allow selecting same file again
+                  e.target.value = '';
+                }}
+              />
+              <label 
+                htmlFor="file-upload" 
+                className="cursor-pointer text-xs font-medium px-2 py-1 bg-slate-100 border border-slate-300 rounded hover:bg-slate-200 transition-colors flex items-center gap-1 text-slate-700"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+                ファイル読込
+              </label>
+            </div>
+          </div>
+          <p className="text-xs text-slate-500 mb-1.5">退院時サマリーや引継ぎメモ等のテキストを貼り付けるか、ファイルを取り込めます（100KBまで）。</p>
+          <textarea
+            rows={4}
+            value={formData.referenceText}
+            onChange={(e) => onUpdateReference(e.target.value)}
+            placeholder="例：〇〇病院 退院支援サマリー：麻痺側の荷重は〇〇..."
+            className={textareaClass}
+          />
         </div>
       </Section>
 
