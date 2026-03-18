@@ -34,6 +34,25 @@ export interface FormData {
   referenceText: string;
 }
 
+// モニタリング用フォームデータ
+export interface MonitoringFormData {
+  caseNumber: string;
+  basicStatus: string;
+  currentIssues: string;
+  goals: string;
+  currentServices: string;
+  monitoringStatus: string;
+  meals: string;
+  excretion: string;
+  bathing: string;
+  skin: string;
+  mobility: string;
+  rehabilitation: string;
+  health: string;
+  psychological: string;
+  notes: string;
+}
+
 // AI生成結果
 export interface GeneratedPlan {
   content: string;

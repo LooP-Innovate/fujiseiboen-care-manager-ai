@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import Header from './components/Header';
 import InputForm from './components/InputForm';
+import MonitoringForm from './components/MonitoringForm';
 import ResultPanel from './components/ResultPanel';
 import { useCarePlan } from './hooks/useCarePlan';
+import { useMonitoring } from './hooks/useMonitoring';
 
 export type AppMode = 'care-plan' | 'monitoring';
 
@@ -20,6 +22,13 @@ const App: React.FC = () => {
     handleGenerate,
     handleClear,
   } = useCarePlan();
+
+  const {
+    monitoringData,
+    updateMonitoringField,
+    handleClearMonitoring,
+    handleGenerateMonitoring,
+  } = useMonitoring();
 
   return (
     <div className="flex flex-col h-screen bg-slate-100">
@@ -69,16 +78,30 @@ const App: React.FC = () => {
         </div>
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center w-full bg-slate-50 h-full p-8 text-center overflow-y-auto">
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 max-w-lg">
-              <span className="text-4xl mb-4 block">🚧</span>
-              <h2 className="text-lg font-bold text-slate-800 mb-2">モニタリング記録モード（開発中）</h2>
-              <p className="text-sm text-slate-500">
-                この画面では、毎月の訪問記録やアセスメント情報を入力し、<br className="hidden sm:block" />
-                支援経過記録やモニタリング報告書の仮文章をAIで自動生成する機能を実装予定です。
-              </p>
+          <>
+            {/* 左ペイン: モニタリング用入力フォーム */}
+            <div className="w-full md:w-1/2 overflow-y-auto border-r border-slate-200 bg-white">
+              <MonitoringForm
+                formData={monitoringData}
+                onUpdateField={updateMonitoringField}
+                onGenerate={handleGenerateMonitoring}
+                onClear={handleClearMonitoring}
+              />
             </div>
-          </div>
+            {/* 右ペイン: プレースホルダ */}
+            <div className="w-full md:w-1/2 overflow-y-auto bg-slate-50 relative">
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-slate-50/80 backdrop-blur-sm z-10">
+                <div className="bg-white p-8 rounded-xl shadow-lg border border-slate-200 max-w-sm">
+                  <span className="text-4xl mb-4 block">🚧</span>
+                  <h2 className="text-lg font-bold text-slate-800 mb-2">生成機能は開発中です</h2>
+                  <p className="text-sm text-slate-500">
+                    現在、入力フォームのみテスト公開しています。<br />
+                    AIによる文章生成機能は近日対応予定です。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </>
         )}
       </main>
     </div>
