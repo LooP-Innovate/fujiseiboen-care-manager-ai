@@ -1,39 +1,44 @@
-import { ReactNode } from 'react';
-
-export interface ChatMessage {
-    id: string;
-    sender: 'user' | 'ai';
-    content: string;
-    isError?: boolean;
-    validation?: {
-        isValid: boolean;
-        errors: string[];
-    };
-    metadata?: {
-        provider: string;
-        model: string;
-    };
+// 利用者の基本情報
+export interface ResidentInfo {
+  name: string;           // 利用者氏名（任意）
+  age: string;            // 年齢
+  gender: '男性' | '女性' | '';
+  careLevel: CareLevel;   // 要介護度
+  mainDiagnosis: string;  // 主疾患・医療的ケア
 }
 
-export interface ChatSession {
-    id: string;
-    title: string;
-    messages: ChatMessage[];
-    task?: TaskType;
-    aiModelId?: string; // e.g. 'gemini-2.5-flash-lite' or 'gpt-4o-mini'
+// 要介護度
+export type CareLevel =
+  | ''
+  | '要支援1'
+  | '要支援2'
+  | '要介護1'
+  | '要介護2'
+  | '要介護3'
+  | '要介護4'
+  | '要介護5';
+
+// 課題・状況
+export interface NeedsInfo {
+  wishes: string;         // 本人・家族の希望
+  physicalStatus: string; // ADL・身体状況（移動・食事・排泄・入浴など）
+  cognition: string;      // 認知・精神状況
+  familySupport: string;  // 家族・支援体制
+  otherRisks: string;     // リスク・留意点
 }
 
-export interface Suggestion {
-    title: string;
-    command: string;
-    description: string;
-    icon: ReactNode;
+// フォームデータ全体
+export interface FormData {
+  resident: ResidentInfo;
+  needs: NeedsInfo;
 }
 
-export interface SuggestionCategory {
-    name: string;
-    suggestions: Suggestion[];
+// AI生成結果
+export interface GeneratedPlan {
+  content: string;
+  isStreaming: boolean;
+  error: string | null;
 }
 
-import { TaskType as AI_TaskType } from '../prompts';
-export type TaskType = AI_TaskType;
+// AIモデル選択
+export type AiModel = 'gemini' | 'openai';
