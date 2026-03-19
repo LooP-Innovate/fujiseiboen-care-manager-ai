@@ -4,6 +4,7 @@ import InputForm from './components/InputForm';
 import MonitoringForm from './components/MonitoringForm';
 import ResultPanel from './components/ResultPanel';
 import MonitoringResultPanel from './components/MonitoringResultPanel';
+import MonitoringSimpleForm from './components/MonitoringSimpleForm';
 import { useCarePlan } from './hooks/useCarePlan';
 import { useMonitoring } from './hooks/useMonitoring';
 
@@ -26,8 +27,10 @@ const App: React.FC = () => {
 
   const {
     monitoringData,
+    inputMode,
     generatedRecord,
     isMonitoringLoading,
+    setInputMode,
     updateMonitoringField,
     handleClearMonitoring,
     handleGenerateMonitoring,
@@ -84,13 +87,39 @@ const App: React.FC = () => {
           <>
             {/* 左ペイン: モニタリング用入力フォーム */}
             <div className="w-full md:w-1/2 overflow-y-auto border-r border-slate-200 bg-white">
-              <MonitoringForm
-                formData={monitoringData}
-                onUpdateField={updateMonitoringField}
-                onGenerate={() => handleGenerateMonitoring(selectedModel)}
-                onClear={handleClearMonitoring}
-                isLoading={isMonitoringLoading}
-              />
+              {/* サブモード切替 */}
+              <div className="px-4 pt-4 flex gap-2">
+                <button 
+                  onClick={() => setInputMode('detailed')}
+                  className={`px-3 py-1 text-xs font-bold rounded-full border transition-colors ${inputMode === 'detailed' ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-300 text-slate-600 hover:border-indigo-400'}`}
+                >
+                  詳細入力
+                </button>
+                <button 
+                  onClick={() => setInputMode('simple')}
+                  className={`px-3 py-1 text-xs font-bold rounded-full border transition-colors ${inputMode === 'simple' ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-slate-300 text-slate-600 hover:border-indigo-400'}`}
+                >
+                  コピペ簡易入力
+                </button>
+              </div>
+
+              {inputMode === 'detailed' ? (
+                <MonitoringForm
+                  formData={monitoringData}
+                  onUpdateField={updateMonitoringField}
+                  onGenerate={() => handleGenerateMonitoring(selectedModel)}
+                  onClear={handleClearMonitoring}
+                  isLoading={isMonitoringLoading}
+                />
+              ) : (
+                <MonitoringSimpleForm
+                  formData={monitoringData}
+                  onUpdateField={updateMonitoringField}
+                  onGenerate={() => handleGenerateMonitoring(selectedModel)}
+                  onClear={handleClearMonitoring}
+                  isLoading={isMonitoringLoading}
+                />
+              )}
             </div>
             {/* 右ペイン: モニタリング生成結果 */}
             <div className="w-full md:w-1/2 overflow-y-auto bg-slate-50">

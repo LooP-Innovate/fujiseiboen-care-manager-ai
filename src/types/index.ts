@@ -51,7 +51,10 @@ export interface MonitoringFormData {
   health: string;
   psychological: string;
   notes: string;
+  pasteText?: string;
 }
+
+export type MonitoringInputMode = 'detailed' | 'simple';
 
 // AI生成結果
 export interface GeneratedPlan {

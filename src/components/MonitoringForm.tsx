@@ -64,13 +64,13 @@ const MonitoringForm: React.FC<MonitoringFormProps> = ({
       {/* グループ1：基本状況と方針 */}
       <Section title="1. 基本状況と方針">
         <div className="grid grid-cols-2 gap-3 mb-3">
-          <Field label="ケース番号/氏名" required>
+          <Field label="ケース番号・識別子" required>
             <input
               type="text"
               value={formData.caseNumber}
               onChange={(e) => onUpdateField('caseNumber', e.target.value)}
               className={inputClass}
-              placeholder="例: 山田花子"
+              placeholder="例: CASE-001, 利用者A"
             />
           </Field>
           <Field label="対象月・実施状況" required>
@@ -182,11 +182,11 @@ const MonitoringForm: React.FC<MonitoringFormProps> = ({
           className="w-2/3 py-3 rounded-lg font-bold text-white bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center justify-center gap-2"
         >
           <span>✨</span>
-          <span>{isLoading ? '生成準備中...' : '記録案を生成(準備中)'}</span>
+          <span>{isLoading ? '生成中...' : '記録案を生成'}</span>
         </button>
       </div>
       {!formData.caseNumber && (
-        <p className="text-xs text-slate-500 text-center mt-2">※ ケース番号/氏名を入力してください</p>
+        <p className="text-xs text-slate-500 text-center mt-2">※ ケース番号・識別子を入力してください</p>
       )}
     </div>
   );
