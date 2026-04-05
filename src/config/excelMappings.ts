@@ -5,22 +5,22 @@ export const CarePlan2Mappings = {
   // 基本情報のセル位置
   basicInfo: {
     userName: 'C4',
-    createdDate: 'J2',
+    createdDate: 'J1',
   },
   // 表の開始行と各列のセルアルファベット
   table: {
     startRow: 8,
-    maxRows: 7, // テンプレートに事前に用意されている行数 (適当に7行を仮定)
+    maxRows: 13, // 8行目から20行目まで (20 - 8 + 1 = 13)
     columns: {
       needs: 'B',           // ニーズ
-      longTermGoal: 'D',    // 長期目標
-      longTermPeriod: 'F',  // 長期期間
-      shortTermGoal: 'G',   // 短期目標
-      shortTermPeriod: 'I', // 短期期間
-      serviceContent: 'J',  // サービス内容
-      serviceType: 'L',     // サービス種別
-      frequency: 'N',       // 頻度
-      period: 'P',          // 期間
+      longTermGoal: 'C',    // 長期目標
+      longTermPeriod: 'D',  // 長期期間
+      shortTermGoal: 'E',   // 短期目標
+      shortTermPeriod: 'F', // 短期期間
+      serviceContent: 'G',  // サービス内容
+      serviceType: 'H',     // サービス種別
+      frequency: 'I',       // 頻度
+      period: 'J',          // 期間
     }
   }
 };
