@@ -5,11 +5,13 @@ import { CarePlan2ExportData } from '../types/excel';
 
 export class ExcelService {
   /**
-   * ダウンロードして差し込む処理
+   * テンプレートを読み込み、指定セルに書き込む（レイアウト固定）
    */
   public static async exportCarePlan2(data: CarePlan2ExportData) {
     try {
-      // 1. Fetch template from public folder
+      console.log('Starting Excel export with Fixed Template approach...');
+
+      // 1. Fetch template
       const response = await fetch('/templates/careplan2_template.xlsx');
       if (!response.ok) {
         throw new Error('テンプレートファイルの読み込みに失敗しました。(/templates/careplan2_template.xlsx)');
@@ -17,7 +19,7 @@ export class ExcelService {
       
       const arrayBuffer = await response.arrayBuffer();
 
-      // 2. Load into ExcelJS Workbook
+      // 2. Load Workbook
       const workbook = new ExcelJS.Workbook();
       await workbook.xlsx.load(arrayBuffer);
       
@@ -26,17 +28,27 @@ export class ExcelService {
         throw new Error('ワークシートが見つかりません。');
       }
 
-      // 3. 基本情報を差し込み
+      // 3. ページ設定を強制固定 (A4, 横向き, 1ページに収める)
+      worksheet.pageSetup = {
+        paperSize: 9, // A4
+        orientation: 'landscape',
+        fitToPage: true,
+        fitToWidth: 1,
+        fitToHeight: 1,
+        margins: { left: 0.5, right: 0.5, top: 0.5, bottom: 0.5, header: 0.3, footer: 0.3 }
+      };
+
+      // 4. 基本情報の書き込み
       if (data.userName) {
-        let nameCell = worksheet.getCell(CarePlan2Mappings.basicInfo.userName);
-        nameCell.value = this.truncateText(data.userName, 20); // 簡単な文字数制限
+        this.writeCell(worksheet, CarePlan2Mappings.basicInfo.userName, data.userName);
+        console.log(`Writing userName: ${data.userName} to ${CarePlan2Mappings.basicInfo.userName}`);
       }
       if (data.createdDate) {
-        let dateCell = worksheet.getCell(CarePlan2Mappings.basicInfo.createdDate);
-        dateCell.value = data.createdDate;
+        this.writeCell(worksheet, CarePlan2Mappings.basicInfo.createdDate, data.createdDate);
+        console.log(`Writing createdDate: ${data.createdDate} to ${CarePlan2Mappings.basicInfo.createdDate}`);
       }
 
-      // 4. テーブルデータを差し込み
+      // 5. テーブルデータの差し込み (1行目から最大行数分)
       const { startRow, maxRows, columns } = CarePlan2Mappings.table;
       
       data.planItems.forEach((item, index) => {
@@ -45,24 +57,24 @@ export class ExcelService {
           return;
         }
 
-        const currentRow = startRow + index;
+        const r = startRow + index;
         
-        this.injectCell(worksheet, `${columns.needs}${currentRow}`, item.needs, 150);
-        this.injectCell(worksheet, `${columns.longTermGoal}${currentRow}`, item.longTermGoal, 150);
-        this.injectCell(worksheet, `${columns.longTermPeriod}${currentRow}`, item.longTermPeriod, 50);
-        this.injectCell(worksheet, `${columns.shortTermGoal}${currentRow}`, item.shortTermGoal, 150);
-        this.injectCell(worksheet, `${columns.shortTermPeriod}${currentRow}`, item.shortTermPeriod, 50);
-        this.injectCell(worksheet, `${columns.serviceContent}${currentRow}`, item.serviceContent, 200);
-        this.injectCell(worksheet, `${columns.serviceType}${currentRow}`, item.serviceType, 50);
-        this.injectCell(worksheet, `${columns.frequency}${currentRow}`, item.frequency, 50);
-        this.injectCell(worksheet, `${columns.period}${currentRow}`, item.period, 60);
+        // 各セルへの書き込み (テンプレートの結合セル・罫線を壊さないよう値をセットするだけ)
+        // 文字数制限は各欄の物理サイズに合わせて調整
+        this.writeCell(worksheet, `${columns.needs}${r}`, item.needs, 150);
+        this.writeCell(worksheet, `${columns.longTermGoal}${r}`, item.longTermGoal, 100);
+        this.writeCell(worksheet, `${columns.longTermPeriod}${r}`, item.longTermPeriod, 30);
+        this.writeCell(worksheet, `${columns.shortTermGoal}${r}`, item.shortTermGoal, 100);
+        this.writeCell(worksheet, `${columns.shortTermPeriod}${r}`, item.shortTermPeriod, 30);
+        this.writeCell(worksheet, `${columns.serviceContent}${r}`, item.serviceContent, 200);
+        this.writeCell(worksheet, `${columns.serviceType}${r}`, item.serviceType, 50);
+        this.writeCell(worksheet, `${columns.frequency}${r}`, item.frequency, 40);
+        this.writeCell(worksheet, `${columns.period}${r}`, item.period, 40);
 
-        // 必要に応じて行の高さを自動調整（簡易）
-        const rowObj = worksheet.getRow(currentRow);
-        rowObj.height = Math.max(rowObj.height || 60, this.calculateRowHeight(item));
+        console.log(`Writing data to row ${r}`);
       });
 
-      // 5. Download the modified workbook
+      // 6. 書き出し
       const buffer = await workbook.xlsx.writeBuffer();
       const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       saveAs(blob, `居宅サービス計画書2_${data.userName || '未記入'}.xlsx`);
@@ -74,30 +86,27 @@ export class ExcelService {
   }
 
   /**
-   * 文字数を制限してセルに書き込む
+   * 指定のセルに値を書き込む。結合セルの場合は左上に書き込めば良い。
+   * レイアウト（罫線・色・フォント）を維持するため、スタイルの上書きは最小限にする。
    */
-  private static injectCell(worksheet: ExcelJS.Worksheet, cellAddress: string, text: string, maxLength: number) {
-    if (!text) return;
-    const cell = worksheet.getCell(cellAddress);
-    // 超過した場合は要確認文字を付ける（コード側での対策）
-    cell.value = this.truncateText(text, maxLength);
-    cell.alignment = { wrapText: true, vertical: 'top' };
+  private static writeCell(worksheet: ExcelJS.Worksheet, address: string, value: string, maxLength: number = 255) {
+    if (!value) return;
+    const cell = worksheet.getCell(address);
+    
+    // 内容をセット (文字数制限付き)
+    cell.value = this.limitText(value, maxLength);
+
+    // 折り返しと上詰め設定だけは、データ量によって必要になるため強制する
+    // (テンプレート側で設定済みでも、書き込み時に確実に適用するため)
+    cell.alignment = { 
+      wrapText: true, 
+      vertical: 'top',
+      horizontal: 'left' // ニーズや目標は左詰め
+    };
   }
 
-  private static truncateText(text: string, maxLength: number): string {
+  private static limitText(text: string, maxLength: number): string {
     if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...【要確認: 文字数オーバー】';
-  }
-
-  /**
-   * 簡易的な行の高さ算出（一番文字数が多い列を基準にする）
-   */
-  private static calculateRowHeight(item: any): number {
-    const maxCharsInCell = Math.max(
-      ...Object.values(item as Record<string, string>).map(val => val ? val.length : 0)
-    );
-    // 適当な算出（1行20文字として、15 height * 行数）
-    const estimatedLines = Math.max(1, Math.ceil(maxCharsInCell / 15));
-    return Math.min(200, Math.max(60, estimatedLines * 20)); 
+    return text.substring(0, maxLength) + '...【要確認: 長文につき一部省略】';
   }
 }

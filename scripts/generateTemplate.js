@@ -6,77 +6,83 @@ async function createTemplate() {
   const workbook = new exceljs.Workbook();
   const sheet = workbook.addWorksheet('居宅サービス計画書（2）');
 
-  // Set column widths to match a professional form layout
+  // Fix column widths for A4 Landscape
+  // Total width should be around 130-140 for A4 Landscape fit
   sheet.columns = [
-    { key: 'A', width: 3 },  // Margin
-    { key: 'B', width: 25 }, // Needs
-    { key: 'C', width: 22 }, // Long Term Goal
-    { key: 'D', width: 8 },  // Period
-    { key: 'E', width: 22 }, // Short Term Goal
-    { key: 'F', width: 8 },  // Period
-    { key: 'G', width: 30 }, // Service Content
-    { key: 'H', width: 15 }, // Service Type
-    { key: 'I', width: 12 }, // Frequency
-    { key: 'J', width: 12 }, // Period
+    { key: 'A', width: 3 },   // Margin
+    { key: 'B', width: 12 },  // Needs (Part 1)
+    { key: 'C', width: 15 },  // Needs (Part 2)
+    { key: 'D', width: 22 },  // Long Goal
+    { key: 'E', width: 8 },   // Period
+    { key: 'F', width: 22 },  // Short Goal
+    { key: 'G', width: 8 },   // Period
+    { key: 'H', width: 35 },  // Service Content
+    { key: 'I', width: 15 },  // Service Type
+    { key: 'J', width: 10 },  // Frequency
+    { key: 'K', width: 10 },  // Period
+    { key: 'L', width: 5 },   // Extra margin
   ];
 
   // Title
-  sheet.mergeCells('B2:J2');
+  sheet.mergeCells('B2:K2');
   const titleCell = sheet.getCell('B2');
   titleCell.value = '居宅サービス計画書（２）';
   titleCell.font = { name: 'MS PGothic', size: 16, bold: true };
   titleCell.alignment = { horizontal: 'center' };
 
   // Creation Date
-  sheet.getCell('I1').value = '作成年月日';
-  sheet.getCell('J1').value = '　　年　月　日';
+  sheet.getCell('J1').value = '作成年月日';
+  sheet.getCell('K1').value = '　　年　月　日';
 
   // Resident Name
   sheet.getCell('B4').value = '利用者名';
-  sheet.getCell('C4').value = '　　　　　　　　　　　　様';
+  sheet.mergeCells('C4:E4');
+  sheet.getCell('C4').value = '　　　　　　　　　　様';
   sheet.getCell('C4').border = { bottom: { style: 'thin' } };
 
-  // Table Headers
+  // Common Header Style
   const headerStyle = {
     fill: { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFE0E0E0' } },
-    font: { name: 'MS PGothic', size: 9, bold: true },
+    font: { name: 'MS PGothic', size: 9 },
     alignment: { horizontal: 'center', vertical: 'middle', wrapText: true },
     border: {
-      top: { style: 'thin' },
-      left: { style: 'thin' },
-      bottom: { style: 'thin' },
-      right: { style: 'thin' }
+       top: { style: 'thin' },
+       left: { style: 'thin' },
+       bottom: { style: 'thin' },
+       right: { style: 'thin' }
     }
   };
 
-  // Row 6 & 7: Headers
-  sheet.mergeCells('B6:B7');
+  // Build Headers
+  // Needs
+  sheet.mergeCells('B6:C7');
   sheet.getCell('B6').value = '生活全般の解決すべき課題\n（ニーズ）';
   
-  sheet.mergeCells('C6:F6');
-  sheet.getCell('C6').value = '目標';
-  
-  sheet.mergeCells('G6:J6');
-  sheet.getCell('G6').value = '援助内容';
+  // Goals block
+  sheet.mergeCells('D6:G6');
+  sheet.getCell('D6').value = '目標';
+  sheet.mergeCells('D7:D7'); sheet.getCell('D7').value = '長期目標';
+  sheet.mergeCells('E7:E7'); sheet.getCell('E7').value = '（期間）';
+  sheet.mergeCells('F7:F7'); sheet.getCell('F7').value = '短期目標';
+  sheet.mergeCells('G7:G7'); sheet.getCell('G7').value = '（期間）';
 
-  sheet.getCell('C7').value = '長期目標';
-  sheet.getCell('D7').value = '（期間）';
-  sheet.getCell('E7').value = '短期目標';
-  sheet.getCell('F7').value = '（期間）';
-  sheet.getCell('G7').value = 'サービス内容';
-  sheet.getCell('H7').value = 'サービス種別';
-  sheet.getCell('I7').value = '頻度';
-  sheet.getCell('J7').value = '期間';
+  // Assistance block
+  sheet.mergeCells('H6:K6');
+  sheet.getCell('H6').value = '援助内容';
+  sheet.getCell('H7').value = 'サービス内容';
+  sheet.getCell('I7').value = 'サービス種別';
+  sheet.getCell('J7').value = '頻度';
+  sheet.getCell('K7').value = '期間';
 
-  // Apply header style
-  ['B6', 'C6', 'G6', 'B7', 'C7', 'D7', 'E7', 'F7', 'G7', 'H7', 'I7', 'J7'].forEach(addr => {
+  ['B6', 'D6', 'H6', 'D7', 'E7', 'F7', 'G7', 'H7', 'I7', 'J7', 'K7'].forEach(addr => {
     sheet.getCell(addr).style = headerStyle;
   });
 
-  // Data Rows (8 to 20 for MVP)
+  // Data Rows (8 to 20)
+  // Each "Row" in data will occupy 1 Excel physical row, but with merged cells
   const dataStyle = {
     font: { name: 'MS PGothic', size: 10 },
-    alignment: { vertical: 'top', wrapText: true, indent: 1 },
+    alignment: { vertical: 'top', horizontal: 'left', wrapText: true },
     border: {
       top: { style: 'thin' },
       left: { style: 'thin' },
@@ -86,19 +92,25 @@ async function createTemplate() {
   };
 
   for (let r = 8; r <= 20; r++) {
-    const row = sheet.getRow(r);
-    row.height = 80;
-    for (let c = 2; c <= 10; c++) {
-      row.getCell(c).style = dataStyle;
+    sheet.getRow(r).height = 100;
+    // Merge Needs
+    sheet.mergeCells(`B${r}:C${r}`);
+    
+    // Apply style to all cells in range B-K
+    for (let c = 2; c <= 11; c++) {
+      sheet.getRow(r).getCell(c).style = dataStyle;
     }
   }
 
-  // Footer Disclaimer
-  const footerRow = 22;
-  sheet.mergeCells(`B${footerRow}:J${footerRow}`);
-  const footerCell = sheet.getCell(`B${footerRow}`);
-  footerCell.value = '※本計画書はAIによる支援原案です。適切なアセスメントに基づき、介護支援専門員が最終的な確認・修正を行ってください。';
-  footerCell.font = { name: 'MS PGothic', size: 9, italic: true, color: { argb: 'FFFF0000' } };
+  // Page Setup
+  sheet.pageSetup = {
+    paperSize: 9, // A4
+    orientation: 'landscape',
+    fitToPage: true,
+    fitToWidth: 1,
+    fitToHeight: 1,
+    margins: { left: 0.5, right: 0.5, top: 0.5, bottom: 0.5, header: 0.3, footer: 0.3 }
+  };
 
   const publicDir = path.resolve(process.cwd(), 'public');
   const tempDir = path.resolve(publicDir, 'templates');
@@ -107,7 +119,7 @@ async function createTemplate() {
 
   const outputPath = path.resolve(tempDir, 'careplan2_template.xlsx');
   await workbook.xlsx.writeFile(outputPath);
-  console.log(`Generated professional template at ${outputPath}`);
+  console.log(`[FINAL] Generated professional template at ${outputPath}`);
 }
 
 createTemplate().catch(console.error);
