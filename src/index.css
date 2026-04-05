@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply antialiased text-slate-900;
+/* カスタムスクロールバー */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
 }

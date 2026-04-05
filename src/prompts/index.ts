@@ -1,3 +1,6 @@
+import { monitoringPromptText } from './monitoringPrompt';
+import { excelExportPrompt } from './excelPrompt';
+
 export const prompts: Record<string, string> = {
   'default': 'ケアマネジャーの業務を支援する副操縦士（Copilot）として振る舞ってください。',
   'ケアプラン案': `あなたは経験豊富なケアマネジャーを支援するAIアシスタントです。
@@ -30,6 +33,8 @@ export const prompts: Record<string, string> = {
    - 入力データからは読み取れず、推測で補った点や、より良いプラン作成のために追加で把握すべき情報。
 9. 参考にした観点
    - アセスメントのどの項目（ADL、本人希望、家族状況、リスク等）を重視して判断したか、見出しレベルで列挙。`,
+  'モニタリング記録': monitoringPromptText,
+  'excel_export': excelExportPrompt.system,
 };
 
 export type TaskType = keyof typeof prompts;

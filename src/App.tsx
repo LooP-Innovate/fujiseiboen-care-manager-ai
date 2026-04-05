@@ -80,6 +80,8 @@ const App: React.FC = () => {
           <ResultPanel
             plan={generatedPlan}
             isLoading={isLoading}
+            userName={formData.resident.name}
+            selectedModel={selectedModel}
           />
         </div>
           </>

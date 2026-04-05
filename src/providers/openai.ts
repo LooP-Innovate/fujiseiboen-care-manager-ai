@@ -14,7 +14,7 @@ export class OpenAIProvider implements IAIProvider {
     });
   }
 
-  async generateText(request: AIRequest): Promise<AIResponse> {
+  async generate(request: AIRequest): Promise<AIResponse> {
     const start = Date.now();
     const response = await this.client.chat.completions.create({
       model: config.openai.model,
@@ -83,7 +83,7 @@ export class OpenAIProvider implements IAIProvider {
       structuredData: JSON.parse(content),
       metadata: {
         provider: this.name,
-        model: response.model,
+        model: config.openai.model,
         latencyMs: Date.now() - start,
         usage: {
           promptTokens: response.usage?.prompt_tokens || 0,

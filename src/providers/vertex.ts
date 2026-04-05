@@ -11,7 +11,7 @@ export class VertexProvider implements IAIProvider {
     this.genAI = new GoogleGenerativeAI(config.vertex.apiKey || '');
   }
 
-  async generateText(request: AIRequest): Promise<AIResponse> {
+  async generate(request: AIRequest): Promise<AIResponse> {
     const start = Date.now();
     console.log(`[VertexProvider] Generating text with model: ${config.vertex.model}`);
     console.log(`[VertexProvider] API Key length: ${config.vertex.apiKey?.length}, Prefix: ${config.vertex.apiKey?.substring(0, 4)}`);

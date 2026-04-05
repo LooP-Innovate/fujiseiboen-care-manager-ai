@@ -1,9 +1,12 @@
 import React from 'react';
-import { GeneratedPlan } from '../types';
+import { GeneratedPlan, AiModel } from '../types';
+import { useExcelExport } from '../hooks/useExcelExport';
 
 interface ResultPanelProps {
   plan: GeneratedPlan;
   isLoading: boolean;
+  userName: string;
+  selectedModel: AiModel;
 }
 
 const parseContent = (text: string) => {
@@ -28,7 +31,8 @@ const parseContent = (text: string) => {
   return sections.length > 0 ? sections : [{ heading: '', content: text }];
 };
 
-const ResultPanel: React.FC<ResultPanelProps> = ({ plan, isLoading }) => {
+const ResultPanel: React.FC<ResultPanelProps> = ({ plan, isLoading, userName, selectedModel }) => {
+  const { isExporting, exportToExcel } = useExcelExport({ userName });
   const handleCopy = () => {
     if (plan.content) {
       navigator.clipboard.writeText(plan.content);
@@ -58,16 +62,25 @@ const ResultPanel: React.FC<ResultPanelProps> = ({ plan, isLoading }) => {
       {/* ヘッダーエリア */}
       <div className="flex items-center justify-between px-4 md:px-5 pb-3 border-b border-slate-200 flex-shrink-0">
         <h2 className="text-base font-bold text-slate-800">📋 生成されたケアプラン草案</h2>
-        <button
-          onClick={handleCopy}
-          disabled={!plan.content || isLoading}
-          className="text-xs font-medium px-4 py-2 bg-white border border-slate-300 rounded shadow-sm hover:bg-slate-50 transition-colors flex items-center gap-1.5 text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
-          </svg>
-          草案をコピー
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => exportToExcel(plan.content, selectedModel)}
+            disabled={!plan.content || isLoading || isExporting}
+            className="text-xs font-medium px-4 py-2 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded shadow-sm hover:bg-indigo-100 transition-colors flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isExporting ? '出力中...' : '帳票出力 (Excel)'}
+          </button>
+          <button
+            onClick={handleCopy}
+            disabled={!plan.content || isLoading}
+            className="text-xs font-medium px-4 py-2 bg-white border border-slate-300 rounded shadow-sm hover:bg-slate-50 transition-colors flex items-center gap-1.5 text-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />
+            </svg>
+            草案をコピー
+          </button>
+        </div>
       </div>
 
       {/* メインコンテンツ（スクロール領域） */}

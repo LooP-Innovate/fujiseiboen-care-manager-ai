@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { MonitoringFormData, GeneratedPlan, AiModel, MonitoringInputMode } from '../types';
 import { AIService } from '../services/aiService';
+import { loadRelevantKnowledge } from '../prompts/knowledgeLoader';
 
 const initialMonitoringData: MonitoringFormData = {
   caseNumber: '',
@@ -40,7 +41,7 @@ export const useMonitoring = () => {
 
   const handleClearMonitoring = useCallback(() => {
     if (window.confirm('モニタリングの入力内容をすべてクリアしますか？')) {
-      setMonitoringData(initialMonitoringData);
+      setMonitoringData({ ...initialMonitoringData });
       setGeneratedRecord({ content: '', isStreaming: false, error: null });
     }
   }, []);
@@ -52,11 +53,14 @@ export const useMonitoring = () => {
     setGeneratedRecord({ content: '', isStreaming: false, error: null });
 
     try {
+      const knowledgeContext = loadRelevantKnowledge(monitoringData, 'monitoring');
       let prompt = '';
       
       if (inputMode === 'detailed') {
         prompt = `
 以下のモニタリング入力情報に基づき、指定されたフォーマットでモニタリング記録を作成してください。
+
+${knowledgeContext ? knowledgeContext + '\n' : ''}
 
 【基本状況】
 ケース番号/識別子: ${monitoringData.caseNumber}
@@ -82,6 +86,8 @@ export const useMonitoring = () => {
         // Simple Mode (Paste Mode)
         prompt = `
 以下の貼り付けられた原文情報に基づき、指定されたフォーマットでモニタリング記録を構造化・整理してください。
+
+${knowledgeContext ? knowledgeContext + '\n' : ''}
 
 【制約事項】
 - 原文にある情報を最優先し、原文にない事実を勝手に推測して補完しないでください。

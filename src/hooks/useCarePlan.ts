@@ -66,7 +66,7 @@ export const useCarePlan = () => {
     setGeneratedPlan({ content: '', isStreaming: false, error: null });
 
     try {
-      const knowledgeContext = loadRelevantKnowledge(formData);
+      const knowledgeContext = loadRelevantKnowledge(formData, 'careplan');
 
       const prompt = `
 以下の利用者情報に基づき、適切なケアプラン草案（解決すべき課題、長期目標、短期目標、サービス内容）を作成してください。

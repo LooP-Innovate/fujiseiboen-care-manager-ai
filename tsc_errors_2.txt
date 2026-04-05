@@ -1,4 +1,3 @@
-scripts/verify-grounding.ts(34,13): error TS2554: Expected 4-5 arguments, but got 6.
 src/components/ChatMessage.tsx(2,10): error TS2305: Module '"../types"' has no exported member 'ChatMessage'.
 src/components/ChatView.tsx(3,10): error TS2305: Module '"../types"' has no exported member 'ChatSession'.
 src/components/MainContent.tsx(4,10): error TS2305: Module '"../types"' has no exported member 'ChatSession'.
